@@ -265,8 +265,8 @@
     // + ลดภาระ DOM: render เฉพาะเมื่อ output เปลี่ยนจริง
     // =========================
     const CYCLE = [
-      "SCBS&P500", "ES-GDIV", "SCBS&P500", "KFGBRAND-D", "ES-GDIV",
-      "SCBS&P500", "ES-GDIV", "SCBS&P500", "KT-PROPERTY-D", "KFGBRAND-D",
+      "SCBS&P500", "ES-GDIV", "SCBS&P500", "KF-HJAPAND", "ES-GDIV",
+      "SCBS&P500", "ES-GDIV", "SCBS&P500", "KT-PROPERTY-D", "KF-HJAPAND",
     ];
     const WEEKLY_BAHT = 1500;
 
@@ -376,8 +376,8 @@ ${line("CYCLE", `#${cycleNo}  step ${step}/10`, "c")}
 ${rows.join("\n")}
 
 <span class="dim">CYCLE ORDER (10)</span>
-<span class="muted">  01 SCBS&P500   02 ES-GDIV   03 SCBS&P500   04 KFGBRAND-D   05 ES-GDIV</span>
-<span class="muted">  06 SCBS&P500   07 ES-GDIV   08 SCBS&P500   09 KT-PROPERTY-D 10 KFGBRAND-D</span>
+<span class="muted">  01 SCBS&P500   02 ES-GDIV   03 SCBS&P500   04 KF-HJAPAND   05 ES-GDIV</span>
+<span class="muted">  06 SCBS&P500   07 ES-GDIV   08 SCBS&P500   09 KT-PROPERTY-D 10 KF-HJAPAND</span>
 `.trim();
 
       if (out !== lastLeftHtml) {
