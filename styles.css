@@ -201,7 +201,7 @@ pre.ascii{
   line-height: 1.0;
   tab-size: 2;
 
-  color: rgba(255, 213, 135, 0.95);
+  color: rgba(255, 224, 138, 0.98);
   text-shadow: 0 0 12px rgba(17, 241, 167, 0.08);
   min-height: 360px;
 }
@@ -285,13 +285,12 @@ pre.dca{
   pointer-events:none;
 }
 
-
 .live {
   display: flex;
   align-items: center;
   gap: 6px;
   font-size: 12px;
-  color: #f87171;
+  color: #e5e7eb;        /* ตัวหนังสือสีขาว */
   letter-spacing: 1px;
   font-weight: 600;
 }
@@ -300,7 +299,7 @@ pre.dca{
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background: #ef4444;
+  background: #ef4444;   /* วงกลมสีแดง */
   box-shadow: 0 0 6px rgba(239,68,68,.8);
   animation: liveBlink 1.2s infinite;
 }
