@@ -1,0 +1,1 @@
+window.SCENES = window.SCENES || [];

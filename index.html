@@ -1,397 +1,101 @@
 <!doctype html>
 <html lang="th">
+
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>DCA Terminal</title>
-  <style>
-    :root { color-scheme: dark; }
-    html, body { height: 100%; }
-    body{
-      margin:0;
-      background:#050812;
-      display:grid;
-      place-items:center;
-      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono","Courier New", monospace;
-      color:#d1fae5;
-    }
-    .wrap{ width:min(1100px, calc(100vw - 24px)); }
-    .term{
-      border-radius:18px;
-      background:
-        radial-gradient(1000px 450px at 50% 0%, rgba(16,185,129,0.12), transparent 60%),
-        linear-gradient(180deg, rgba(2,6,23,0.92), rgba(2,6,23,0.97));
-      border:1px solid rgba(255,255,255,0.10);
-      box-shadow:0 30px 120px rgba(0,0,0,0.55);
-      overflow:hidden;
-      position:relative;
-    }
-    .titlebar{
-      display:flex; align-items:center; justify-content:space-between; gap:12px;
-      padding:12px 14px;
-      border-bottom:1px solid rgba(255,255,255,0.08);
-      background:rgba(255,255,255,0.03);
-      color:rgba(226,232,240,0.92);
-      font-size:12px;
-      letter-spacing:.06em;
-      text-transform:uppercase;
-    }
-    .dots{ display:flex; gap:8px; align-items:center; }
-    .dot{ width:10px; height:10px; border-radius:999px; opacity:.9; }
-    .dot.r{ background:#ff5f56; } .dot.y{ background:#ffbd2e; } .dot.g{ background:#27c93f; }
-
-    .live{ display:inline-flex; align-items:center; gap:8px; font-weight:700; }
-    .live i{
-      width:8px; height:8px; border-radius:999px;
-      background:#34d399;
-      box-shadow:0 0 16px rgba(52,211,153,0.55);
-      animation:pulse 1.2s ease-in-out infinite;
-    }
-    @keyframes pulse{ 0%{transform:scale(1);opacity:.6} 50%{transform:scale(1.25);opacity:1} 100%{transform:scale(1);opacity:.6} }
-
-    .scanline{
-      position:absolute; inset:0;
-      pointer-events:none;
-      background:linear-gradient(to bottom, transparent, rgba(255,255,255,0.05), transparent);
-      opacity:.22;
-      animation:scan 7s ease-in-out infinite;
-      mix-blend-mode:overlay;
-    }
-    @keyframes scan{
-      0%{transform:translateY(-70%);opacity:0}
-      20%{opacity:.35}
-      60%{opacity:.24}
-      100%{transform:translateY(140%);opacity:0}
-    }
-
-    /* -------- 2-column terminal body -------- */
-    .body{
-      display:grid;
-      grid-template-columns: 1.25fr 0.75fr; /* ซ้ายกว้างกว่า ขวาเล็กกว่า */
-      gap:0;
-      align-items:stretch;
-      min-height: 520px;
-    }
-    .pane{
-      padding:16px 16px 18px;
-      overflow:auto;
-      white-space:pre;
-      margin:0;
-    }
-    /* divider */
-    .pane.right{
-      border-left:1px solid rgba(255,255,255,0.08);
-      background:rgba(255,255,255,0.01);
-    }
-
-    /* Left (DCA) */
-    #left{
-      font-size:14px;
-      line-height:1.5;
-    }
-
-    /* Right (Movie) - keep normal (no scale jitter) */
-    #movie{
-      font-size:4px;
-      line-height:0.6;
-      transform:none;                 /* ป้องกัน font+scale ทำให้เพี้ยน */
-      transform-origin: top left;
-    }
-
-    /* terminal colors */
-    .g{ color:#34d399; }
-    .c{ color:#60a5fa; }
-    .y{ color:#fbbf24; }
-    .p{ color:#a78bfa; }
-    .w{ color:#e5e7eb; }
-    .dim{ color:rgba(148,163,184,0.9); }
-    .muted{ color:rgba(148,163,184,0.75); }
-    .strong{ font-weight:800; }
-
-    .hint{
-      margin-top:10px;
-      color:rgba(148,163,184,0.9);
-      font-size:11px;
-      letter-spacing:.03em;
-      text-align:right;
-      user-select:none;
-    }
-
-    /* ====== bash cursor blink ====== */
-    .cursor{
-      display:inline-block;
-      width:9px;
-      height:1em;
-      margin-left:6px;
-      border-radius:2px;
-      background: currentColor;
-      vertical-align:-0.12em;
-      animation: cursorBlink 1.05s steps(1,end) infinite;
-    }
-    @keyframes cursorBlink { 50% { opacity:0; } }
-    @media (prefers-reduced-motion: reduce){
-      .cursor{ animation:none; opacity:1; }
-    }
-
-    /* Mobile: stack */
-    @media (max-width: 900px){
-      .body{ grid-template-columns: 1fr; }
-      .pane.right{ border-left:none; border-top:1px solid rgba(255,255,255,0.08); }
-      #movie{ transform: none; font-size:10px; }
-    }
-  </style>
+  <link rel="stylesheet" href="styles.css" />
+  <title>Terminal</title>
 </head>
 
 <body>
   <div class="wrap">
     <div class="term">
-      <div class="scanline"></div>
-      <div class="titlebar">
+      <!-- TOP BAR -->
+      <div class="bar">
         <div class="dots" aria-hidden="true">
-          <span class="dot r"></span><span class="dot y"></span><span class="dot g"></span>
+          <div class="dot"></div>
+          <div class="dot"></div>
+          <div class="dot"></div>
         </div>
-        <div class="live"><i></i>LIVE · DCA TERMINAL</div>
+        <div class="title">ASCII Terminal</div>
       </div>
 
-      <div class="body">
-        <pre id="left" class="pane left"></pre>
-        <pre id="movie" class="pane right"></pre>
+      <!-- CLEAN SPLIT -->
+      <div class="shell">
+        <!-- LEFT PANE -->
+        <section class="pane pane-left">
+          <header class="paneHead">
+            <div class="prompt">
+              <span class="ps1">i2x@Shell</span><span>:</span><span>~</span><span>$</span>
+              <span id="cmdHint">dca status</span>
+              <span class="cursor" aria-hidden="true"></span>
+            </div>
+          </header>
+
+          <main class="paneBody">
+            <div class="slot" id="leftSlot">
+              <pre class="dca" id="dcaOut">loading...</pre>
+            </div>
+          </main>
+
+          <footer class="paneFoot">
+            <div class="subtle">>_</div>
+          </footer>
+        </section>
+        <!-- RIGHT PANE -->
+        <section class="pane pane-right">
+          <header class="paneHead">
+            <div class="rightTitle">
+              <div class="live">
+                <span class="liveDot"></span>
+                Live
+              </div>
+            </div>
+
+            <div class="meta">
+
+
+            </div>
+          </header>
+
+          <main class="paneBody">
+            <!-- Right module slot (future widgets) -->
+            <div class="slot" id="rightSlot">
+              <pre class="ascii" id="asciiOut">booting...</pre>
+            </div>
+          </main>
+
+          <footer class="paneFoot">
+
+
+          </footer>
+        </section>
+      </div>
+
+      <!-- FOOTER -->
+      <div class="footer">
+
+
+
       </div>
     </div>
-
-    <div class="hint">DCA updates automatically • Movie loops from movie_ascii.js</div>
   </div>
 
-  <!-- Load movie first -->
-  <script src="movie_ascii.js"></script>
+  <!-- SCENES (no fetch => no CORS) -->
+  <script src="./scenes/init.js"></script>
 
-  <script>
-  (() => {
-    const left = document.getElementById("left");
-    const movieEl = document.getElementById("movie");
+  <script src="./scenes/01.js"></script>
+  <script src="./scenes/02.js"></script>
+  <script src="./scenes/03.js"></script>
+  <script src="./scenes/04.js"></script>
+  <script src="./scenes/05.js"></script>
+  <script src="./scenes/06.js"></script>
+  <script src="./scenes/07.js"></script>
 
-    // =========================
-    // MOVIE (smooth + resilient)
-    // - no trim that breaks ASCII spacing
-    // - requestAnimationFrame timing (no setInterval drift)
-    // =========================
-    const SEP = "---FRAME---";
-    let MOVIE_FPS = 4;
 
-    let movieFrames = [];
-    let movieIdx = 0;
-    let movieReady = false;
-
-    let rafId = 0;
-    let lastTick = 0;
-
-    function parseFps(text){
-      const m = text.match(/^#\s*FPS\s*=\s*([0-9.]+)\s*$/m);
-      if (!m) return null;
-      const v = parseFloat(m[1]);
-      return (Number.isFinite(v) && v > 0) ? v : null;
-    }
-
-    function stripOnlyOuterNewlines(s){
-      // สำคัญ: ห้าม trim() เพราะจะทำให้ช่องว่างนำหน้าหาย (ASCII เพี้ยน)
-      return s
-        .replace(/\r/g, "")
-        .replace(/^\n+/, "")
-        .replace(/\n+$/, "");
-    }
-
-    function extractFrames(text){
-      const fps = parseFps(text);
-      if (fps) MOVIE_FPS = fps;
-
-      // ลบเฉพาะบรรทัด FPS (ไม่ลบบรรทัด # อื่น ๆ เผื่อ movie มี # เป็นงานศิลป์)
-      const cleaned = text.replace(/^#\s*FPS\s*=.*$/m, "");
-
-      return cleaned
-        .split(SEP)
-        .map(stripOnlyOuterNewlines)
-        .filter(s => s.length > 0);
-    }
-
-    function renderMovie(){
-      if (!movieReady) {
-        movieEl.textContent =
-          "MOVIE: not ready\n\n" +
-          "- Ensure movie_ascii.js is next to index.html\n" +
-          "- Ensure it defines window.MOVIE_ASCII_TEXT\n";
-        return;
-      }
-      movieEl.textContent = movieFrames[movieIdx] || "";
-    }
-
-    function startMovie(){
-      const text = window.MOVIE_ASCII_TEXT || "";
-      movieFrames = extractFrames(text);
-      movieIdx = 0;
-      movieReady = movieFrames.length > 0;
-
-      if (rafId) cancelAnimationFrame(rafId);
-
-      if (!movieReady) {
-        renderMovie();
-        return;
-      }
-
-      renderMovie();
-
-      lastTick = performance.now();
-      const frameMs = 1000 / MOVIE_FPS;
-
-      const loop = (now) => {
-        const dt = now - lastTick;
-
-        if (dt >= frameMs) {
-          // เครื่องหน่วงก็ข้ามเฟรมแบบเป็นระบบ ไม่ทำให้เพี้ยน
-          const advance = Math.floor(dt / frameMs);
-          movieIdx = (movieIdx + advance) % movieFrames.length;
-          lastTick += advance * frameMs;
-          renderMovie();
-        }
-
-        rafId = requestAnimationFrame(loop);
-      };
-
-      rafId = requestAnimationFrame(loop);
-    }
-
-    // =========================
-    // DCA (เดิมของคุณ)
-    // + ลดภาระ DOM: render เฉพาะเมื่อ output เปลี่ยนจริง
-    // =========================
-    const CYCLE = [
-      "SCBS&P500", "ES-GDIV", "SCBS&P500", "KF-HJAPAND", "ES-GDIV",
-      "SCBS&P500", "ES-GDIV", "SCBS&P500", "KT-PROPERTY-D", "KF-HJAPAND",
-    ];
-    const WEEKLY_BAHT = 1500;
-
-    const ANCHOR_DATE = new Date(2026, 2, 4);
-    ANCHOR_DATE.setHours(0,0,0,0);
-
-    const pad2 = (n) => String(n).padStart(2,"0");
-    const fmtYMD = (d) => `${d.getFullYear()}-${pad2(d.getMonth()+1)}-${pad2(d.getDate())}`;
-
-    const addDays = (date, days) => {
-      const d = new Date(date);
-      d.setDate(d.getDate() + days);
-      d.setHours(0,0,0,0);
-      return d;
-    };
-
-    const startOfMondayWeek = (date) => {
-      const d = new Date(date.getFullYear(), date.getMonth(), date.getDate());
-      const day = d.getDay();
-      const diff = (day === 0) ? -6 : (1 - day);
-      d.setDate(d.getDate() + diff);
-      d.setHours(0,0,0,0);
-      return d;
-    };
-
-    const FIRST_FULL_WEEK_MONDAY = addDays(startOfMondayWeek(ANCHOR_DATE), 7);
-
-    const weekIndexFromAnchor = (now) => {
-      const n = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-      n.setHours(0,0,0,0);
-      if (n < ANCHOR_DATE) return -1;
-      if (n < FIRST_FULL_WEEK_MONDAY) return 0;
-      const nowMon = startOfMondayWeek(n);
-      const diffDays = Math.floor((nowMon - FIRST_FULL_WEEK_MONDAY) / (24*3600*1000));
-      return 1 + Math.floor(diffDays / 7);
-    };
-
-    const posInCycle = (weekIdx) => ((weekIdx % 10) + 10) % 10;
-
-    const rangeForWeekIdx = (weekIdx) => {
-      if (weekIdx === 0) return { start: ANCHOR_DATE, end: addDays(FIRST_FULL_WEEK_MONDAY, -1) };
-      const start = addDays(FIRST_FULL_WEEK_MONDAY, (weekIdx - 1) * 7);
-      return { start, end: addDays(start, 6) };
-    };
-
-    const nextMondayCountdown = (now) => {
-      const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-      today.setHours(0,0,0,0);
-      const day = today.getDay();
-      let daysLeft = (8 - day) % 7;
-      if (daysLeft === 0) daysLeft = 7;
-      const nextMon = addDays(today, daysLeft);
-      return { nextMon, daysLeft };
-    };
-
-    const esc = (s) => s.replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;");
-
-    function line(label, value, clsValue="w") {
-      const L = label.padEnd(14, " ");
-      return `<span class="dim">${esc(L)}</span><span class="${clsValue}">${esc(value)}</span>`;
-    }
-
-    function scheduleRow(tag, weekNo, step, range, fund) {
-      const a = tag.padEnd(6," ");
-      const b = (`W${String(weekNo).padStart(3,"0")}`).padEnd(6," ");
-      const c = (`S${step}/10`).padEnd(7," ");
-      const d = (range).padEnd(25," ");
-      return `${esc(a)} ${esc(b)} ${esc(c)} <span class="muted">${esc(d)}</span> <span class="w strong">${esc(fund)}</span>`;
-    }
-
-    let lastLeftHtml = "";
-
-    function renderDCA(){
-      const now = new Date();
-      const wIdx = weekIndexFromAnchor(now);
-      const step = posInCycle(wIdx) + 1;
-      const weekNo = wIdx + 1;
-      const cycleNo = Math.floor(wIdx / 10) + 1;
-      const { start, end } = rangeForWeekIdx(wIdx);
-      const { nextMon, daysLeft } = nextMondayCountdown(now);
-
-      const thisFund = CYCLE[step - 1];
-
-      const rows = [];
-      const thisRange = `${fmtYMD(start)} → ${fmtYMD(end)}`;
-      rows.push(scheduleRow("THIS", weekNo, step, thisRange, thisFund));
-      for (let k=1;k<=3;k++){
-        const idx = wIdx + k;
-        const wn = idx + 1;
-        const st = posInCycle(idx) + 1;
-        const r = rangeForWeekIdx(idx);
-        const rg = `${fmtYMD(r.start)} → ${fmtYMD(r.end)}`;
-        rows.push(scheduleRow(`NEXT${k}`, wn, st, rg, CYCLE[st-1]));
-      }
-
-      const out = `
-<span class="g strong">$ dca</span> <span class="muted">status</span><span class="g cursor" aria-hidden="true"></span>
-
-${line("TODAY", fmtYMD(now), "w")}
-${line("RESET IN", `${daysLeft} day(s)  (next Monday: ${fmtYMD(nextMon)})`, "y")}
-${line("WEEK", `#${weekNo}  (${fmtYMD(start)} → ${fmtYMD(end)})`, "w")}
-${line("CYCLE", `#${cycleNo}  step ${step}/10`, "c")}
-
-<span class="w strong">BUY THIS WEEK:</span> <span class="g strong">${esc(thisFund)}</span> <span class="muted">[฿${WEEKLY_BAHT.toLocaleString()}]</span>
-
-<span class="dim">SCHEDULE (THIS + NEXT 3)</span>
-${rows.join("\n")}
-
-<span class="dim">CYCLE ORDER (10)</span>
-<span class="muted">  01 SCBS&P500   02 ES-GDIV   03 SCBS&P500   04 KF-HJAPAND   05 ES-GDIV</span>
-<span class="muted">  06 SCBS&P500   07 ES-GDIV   08 SCBS&P500   09 KT-PROPERTY-D 10 KF-HJAPAND</span>
-`.trim();
-
-      if (out !== lastLeftHtml) {
-        lastLeftHtml = out;
-        left.innerHTML = out;
-      }
-    }
-
-    // start
-    renderDCA();
-    startMovie();
-
-    // เบาลงหน่อย (ยัง live อยู่ แต่ไม่รัว DOM)
-    setInterval(renderDCA, 1000);
-  })();
-  </script>
+  <script src="dca.js"></script>
+  <script src="main.js"></script>
 </body>
+
 </html>
