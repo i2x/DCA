@@ -78,7 +78,6 @@
       fi = 0;
       si = pickNextScene();
     }
-
     render();
     schedule();
   };
